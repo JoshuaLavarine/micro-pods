@@ -1,13 +1,12 @@
-// PodList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 
 const defaultPageSize = 5;
-const leftDoubleArrow = "\u00AB"; // «
-const leftSingleArrow = "\u2039"; // <
-const rightSingleArrow = "\u203A"; // >
-const rightDoubleArrow = "\u00BB"; // »
+const leftDoubleArrow = "\u00AB";
+const leftSingleArrow = "\u2039";
+const rightSingleArrow = "\u203A";
+const rightDoubleArrow = "\u00BB";
 
 export default function PodList() {
   const [pods, setPods] = useState([]);
@@ -16,6 +15,46 @@ export default function PodList() {
   const [podsTotal, setPodsTotal] = useState(0);
   const [sortPreference, setSortPreference] = useState("desc");
   const [pageSize, setPageSize] = useState(defaultPageSize);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate from localStorage only once on mount
+  useEffect(() => {
+    const storedInput = localStorage.getItem("podInput");
+    const storedPage = localStorage.getItem("currentPage");
+    const storedSort = localStorage.getItem("sortPreference");
+    const storedPageSize = localStorage.getItem("pageSize");
+
+    if (storedInput !== null) setInput(storedInput);
+    if (storedPage !== null) setPage(parseInt(storedPage, 10));
+    if (storedSort !== null) setSortPreference(storedSort);
+    if (storedPageSize !== null) setPageSize(parseInt(storedPageSize, 10));
+
+    setIsHydrated(true);
+  }, []);
+
+  // Persist to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem("podInput", input);
+  }, [input]);
+
+  useEffect(() => {
+    localStorage.setItem("currentPage", String(page));
+  }, [page]);
+
+  useEffect(() => {
+    localStorage.setItem("sortPreference", sortPreference);
+  }, [sortPreference]);
+
+  useEffect(() => {
+    localStorage.setItem("pageSize", String(pageSize));
+  }, [pageSize]);
+
+  // Fetch pods only after hydration is complete
+  useEffect(() => {
+    if (isHydrated) {
+      fetchPods(page, sortPreference, pageSize);
+    }
+  }, [page, sortPreference, pageSize, isHydrated]);
 
   const fetchPods = async (
     targetPage = page,
@@ -30,10 +69,6 @@ export default function PodList() {
     setPodsTotal(data.total);
   };
 
-  useEffect(() => {
-    fetchPods();
-  }, [page, sortPreference, pageSize]);
-
   const addPod = async () => {
     const res = await fetch("/api/pods", {
       method: "POST",
@@ -46,8 +81,8 @@ export default function PodList() {
 
     if (res.status === 201) {
       setInput("");
+      localStorage.removeItem("podInput");
 
-      // Fetch total again to calculate new last page based on current pageSize
       const countRes = await fetch(
         `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
       );
@@ -56,10 +91,7 @@ export default function PodList() {
       const newTotalPages = Math.ceil(updatedTotal / pageSize);
       const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1;
 
-      // Update the page state
       setPage(targetPageAfterAdd);
-
-      // Immediately fetch the pods for the new page with the current pageSize
       fetchPods(targetPageAfterAdd, sortPreference, pageSize);
     }
   };
@@ -73,31 +105,17 @@ export default function PodList() {
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
-    setPage(1); // Reset to the first page when page size changes
+    setPage(1); // Reset to the first page
   };
 
-  const goToFirstPage = () => {
-    setPage(1);
-  };
-
-  const goToPreviousPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    }
-  };
-
-  const goToLastPage = () => {
-    setPage(totalPages);
-  };
+  const goToFirstPage = () => setPage(1);
+  const goToPreviousPage = () => page > 1 && setPage(page - 1);
+  const goToNextPage = () => page < totalPages && setPage(page + 1);
+  const goToLastPage = () => setPage(totalPages);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Header */}
       <header
         style={{
           padding: "20px",
@@ -112,6 +130,7 @@ export default function PodList() {
         <h1>Micro-Pods</h1>
       </header>
 
+      {/* Input section */}
       <section
         style={{
           padding: "20px",
@@ -150,6 +169,7 @@ export default function PodList() {
         </div>
       </section>
 
+      {/* Main pod list */}
       <main style={{ padding: "20px", flexGrow: 1, overflowY: "auto" }}>
         <div
           style={{
@@ -177,7 +197,7 @@ export default function PodList() {
             listStyleType: "none",
             padding: 0,
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", // Adjust minmax for desired size
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
             gap: "10px",
           }}
         >
@@ -187,8 +207,8 @@ export default function PodList() {
               style={{
                 border: "1px solid #ccc",
                 padding: "10px",
-                height: "150px", // Fixed height for all pods
-                overflowY: "auto", // Enable scrolling for long text
+                height: "150px",
+                overflowY: "auto",
                 wordBreak: "break-word",
               }}
             >
@@ -199,6 +219,7 @@ export default function PodList() {
         {pods.length === 0 && <p>No pods created yet.</p>}
       </main>
 
+      {/* Pagination footer */}
       <footer
         style={{
           padding: "20px",
