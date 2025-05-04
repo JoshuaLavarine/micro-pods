@@ -14,8 +14,6 @@ export default function PodList() {
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
   const [podsTotal, setPodsTotal] = useState(0);
-  const [pageInput, setPageInput] = useState(page);
-  const [pageJumpError, setPageJumpError] = useState(false);
   const [sortPreference, setSortPreference] = useState("desc");
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
@@ -71,14 +69,6 @@ export default function PodList() {
   const isLastPage = page === totalPages && totalPages > 0;
   const firstResult = (page - 1) * pageSize + 1;
   const lastResult = Math.min(page * pageSize, podsTotal);
-
-  const handlePageJump = () => {
-    const target = parseInt(pageInput, 10);
-    if (!isNaN(target) && target >= 1 && target <= totalPages) {
-      setPage(target);
-      setPageInput("");
-    }
-  };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
