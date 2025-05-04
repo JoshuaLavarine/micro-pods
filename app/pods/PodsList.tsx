@@ -1,3 +1,4 @@
+// PodList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,58 +17,62 @@ export default function PodList() {
   const [sortPreference, setSortPreference] = useState("desc");
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-  // Hydrate from localStorage only once on mount
+  const totalPages = Math.ceil(podsTotal / pageSize);
+  const isFirstPage = page === 1;
+  const isLastPage = page === totalPages && totalPages > 0;
+  const firstResult = (page - 1) * pageSize + 1;
+  const lastResult = Math.min(page * pageSize, podsTotal);
+
+  // Load state from localStorage once on mount
   useEffect(() => {
-    const storedInput = localStorage.getItem("podInput");
-    const storedPage = localStorage.getItem("currentPage");
-    const storedSort = localStorage.getItem("sortPreference");
-    const storedPageSize = localStorage.getItem("pageSize");
+    const savedInput = localStorage.getItem("podInput");
+    const savedPage = localStorage.getItem("currentPage");
+    const savedSort = localStorage.getItem("sortPreference");
+    const savedPageSize = localStorage.getItem("pageSize");
 
-    if (storedInput !== null) setInput(storedInput);
-    if (storedPage !== null) setPage(parseInt(storedPage, 10));
-    if (storedSort !== null) setSortPreference(storedSort);
-    if (storedPageSize !== null) setPageSize(parseInt(storedPageSize, 10));
+    if (savedInput !== null) setInput(savedInput);
+    if (savedPage !== null) setPage(parseInt(savedPage, 10));
+    if (savedSort !== null) setSortPreference(savedSort);
+    if (savedPageSize !== null) setPageSize(parseInt(savedPageSize, 10));
 
     setIsHydrated(true);
   }, []);
 
-  // Persist to localStorage when values change
+  // Persist state changes to localStorage
   useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem("podInput", input);
-  }, [input]);
-
-  useEffect(() => {
-    localStorage.setItem("currentPage", String(page));
-  }, [page]);
-
-  useEffect(() => {
+    localStorage.setItem("currentPage", page.toString());
     localStorage.setItem("sortPreference", sortPreference);
-  }, [sortPreference]);
-
-  useEffect(() => {
-    localStorage.setItem("pageSize", String(pageSize));
-  }, [pageSize]);
-
-  // Fetch pods only after hydration is complete
-  useEffect(() => {
-    if (isHydrated) {
-      fetchPods(page, sortPreference, pageSize);
-    }
-  }, [page, sortPreference, pageSize, isHydrated]);
+    localStorage.setItem("pageSize", pageSize.toString());
+  }, [input, page, sortPreference, pageSize, isHydrated]);
 
   const fetchPods = async (
     targetPage = page,
     currentSort = sortPreference,
     size = pageSize
   ) => {
-    const res = await fetch(
-      `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
-    );
-    const data = await res.json();
-    setPods(data.pods);
-    setPodsTotal(data.total);
+    setIsFetching(true);
+    try {
+      const res = await fetch(
+        `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
+      );
+      const data = await res.json();
+      setPods(data.pods);
+      setPodsTotal(data.total);
+    } finally {
+      setIsFetching(false);
+    }
   };
+
+  // Fetch pods after hydration or when pagination/sort/pageSize changes
+  useEffect(() => {
+    if (isHydrated) {
+      fetchPods();
+    }
+  }, [page, sortPreference, pageSize, isHydrated]);
 
   const addPod = async () => {
     const res = await fetch("/api/pods", {
@@ -81,7 +86,6 @@ export default function PodList() {
 
     if (res.status === 201) {
       setInput("");
-      localStorage.removeItem("podInput");
 
       const countRes = await fetch(
         `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
@@ -96,16 +100,10 @@ export default function PodList() {
     }
   };
 
-  const totalPages = Math.ceil(podsTotal / pageSize);
-  const isFirstPage = page === 1;
-  const isLastPage = page === totalPages && totalPages > 0;
-  const firstResult = (page - 1) * pageSize + 1;
-  const lastResult = Math.min(page * pageSize, podsTotal);
-
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
-    setPage(1); // Reset to the first page
+    setPage(1);
   };
 
   const goToFirstPage = () => setPage(1);
@@ -113,9 +111,37 @@ export default function PodList() {
   const goToNextPage = () => page < totalPages && setPage(page + 1);
   const goToLastPage = () => setPage(totalPages);
 
+  // Show loading state during hydration or fetching
+  if (!isHydrated || isFetching) {
+    return (
+      <div style={{ padding: "40px", textAlign: "center" }}>
+        <div className="spinner" />
+        <p>{!isHydrated ? "Loading settings..." : "Loading pods..."}</p>
+        <style jsx>{`
+          .spinner {
+            margin: 0 auto 10px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #555;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Header */}
       <header
         style={{
           padding: "20px",
@@ -130,7 +156,6 @@ export default function PodList() {
         <h1>Micro-Pods</h1>
       </header>
 
-      {/* Input section */}
       <section
         style={{
           padding: "20px",
@@ -169,7 +194,6 @@ export default function PodList() {
         </div>
       </section>
 
-      {/* Main pod list */}
       <main style={{ padding: "20px", flexGrow: 1, overflowY: "auto" }}>
         <div
           style={{
@@ -219,7 +243,6 @@ export default function PodList() {
         {pods.length === 0 && <p>No pods created yet.</p>}
       </main>
 
-      {/* Pagination footer */}
       <footer
         style={{
           padding: "20px",
@@ -249,7 +272,9 @@ export default function PodList() {
         </div>
         <div>
           <span>
-            {firstResult}-{lastResult} of {podsTotal}
+            {podsTotal === 0
+              ? "0 results"
+              : `${firstResult}-${lastResult} of ${podsTotal}`}
           </span>
           <button
             onClick={goToFirstPage}
