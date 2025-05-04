@@ -81,15 +81,26 @@ export default function PodList() {
 
   return (
     <div>
-            <h1>Pods</h1>
-           {" "}
-      <input
+            <h1>Pods</h1>     
+      <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onChange={(e) => setInput(e.target.value)}
         placeholder="New pod"
+        rows={4}
+        style={{
+          width: "100%",
+          resize: "vertical",
+          overflowY: "auto",
+          maxHeight: "150px",
+          marginBottom: "5px",
+        }}
       />
-            <button onClick={addPod}>Add Pod</button>     {" "}
+      <div style={{ textAlign: "right", fontSize: "0.9em", color: "#666" }}>
+        {input.length} characters
+      </div>
+      <br />
+      <button onClick={addPod}>Add Pod</button>
       <select
         value={sortPreference}
         onChange={(e) => setSortPreference(e.target.value)}
