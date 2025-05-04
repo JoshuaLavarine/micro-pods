@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 
 const defaultPageSize = 5;
-const leftArrow = "<";
-const rightArrow = ">";
+const leftDoubleArrow = "\u00AB"; // «
+const leftSingleArrow = "\u2039"; // <
+const rightSingleArrow = "\u203A"; // >
+const rightDoubleArrow = "\u00BB"; // »
 
 export default function PodList() {
   const [pods, setPods] = useState([]);
@@ -44,26 +46,30 @@ export default function PodList() {
     });
 
     if (res.status === 201) {
-      setInput(""); // Fetch total again to calculate new last page based on current pageSize
+      setInput("");
 
+      // Fetch total again to calculate new last page based on current pageSize
       const countRes = await fetch(
         `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
       );
       const countData = await countRes.json();
       const updatedTotal = countData.total;
       const newTotalPages = Math.ceil(updatedTotal / pageSize);
-      const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1; // Update the page state
+      const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1;
 
-      setPage(targetPageAfterAdd); // Immediately fetch the pods for the new page with the current pageSize
+      // Update the page state
+      setPage(targetPageAfterAdd);
 
+      // Immediately fetch the pods for the new page with the current pageSize
       fetchPods(targetPageAfterAdd, sortPreference, pageSize);
     }
   };
 
   const totalPages = Math.ceil(podsTotal / pageSize);
-  const visiblePages = [page - 2, page - 1, page, page + 1, page + 2].filter(
-    (pageNum) => pageNum > 0 && pageNum <= totalPages
-  );
+  const isFirstPage = page === 1;
+  const isLastPage = page === totalPages && totalPages > 0;
+  const firstResult = (page - 1) * pageSize + 1;
+  const lastResult = Math.min(page * pageSize, podsTotal);
 
   const handlePageJump = () => {
     const target = parseInt(pageInput, 10);
@@ -79,107 +85,166 @@ export default function PodList() {
     setPage(1); // Reset to the first page when page size changes
   };
 
+  const goToFirstPage = () => {
+    setPage(1);
+  };
+
+  const goToPreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  const goToLastPage = () => {
+    setPage(totalPages);
+  };
+
   return (
-    <div>
-            <h1>Pods</h1>     
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="New pod"
-        rows={4}
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
+      <header
         style={{
-          width: "100%",
-          resize: "vertical",
-          overflowY: "auto",
-          maxHeight: "150px",
-          marginBottom: "5px",
+          padding: "20px",
+          borderBottom: "1px solid #eee",
+          textAlign: "center",
         }}
-      />
-      <div style={{ textAlign: "right", fontSize: "0.9em", color: "#666" }}>
-        {input.length} characters
-      </div>
-      <br />
-      <button onClick={addPod}>Add Pod</button>
-      <select
-        value={sortPreference}
-        onChange={(e) => setSortPreference(e.target.value)}
       >
-                <option value="desc">Sort by ID Descending</option>       {" "}
-        <option value="asc">Sort by ID Ascending</option>     {" "}
-      </select>
-           {" "}
-      <select value={pageSize} onChange={handlePageSizeChange}>
-                <option value={5}>5 per page</option>       {" "}
-        <option value={10}>10 per page</option>       {" "}
-        <option value={25}>25 per page</option>       {" "}
-        <option value={50}>50 per page</option>       {" "}
-        <option value={100}>100 per page</option>     {" "}
-      </select>
-           {" "}
-      <ul>
-               {" "}
-        {pods.map((pod) => (
-          <li key={pod.id}>
-                        {pod.id}: {pod.title}         {" "}
-          </li>
-        ))}
-             {" "}
-      </ul>
-           {" "}
-      <div style={{ marginTop: "20px" }}>
-               {" "}
-        <button
-          style={{ marginRight: "20px", fontWeight: "bold" }}
-          disabled={page <= 1}
-          onClick={() => setPage(page - 1)}
-        >
-                    {leftArrow}       {" "}
-        </button>
-                {page}       {" "}
-        <button
-          style={{ marginLeft: "20px", fontWeight: "bold" }}
-          disabled={page === totalPages || totalPages === 0}
-          onClick={() => setPage(page + 1)}
-        >
-                    {rightArrow}       {" "}
-        </button>
-                Page {page} of {totalPages === 0 ? 1 : totalPages}     {" "}
-      </div>
-           {" "}
-      <div style={{ marginTop: "10px" }}>
-               {" "}
-        <input
-          type="number"
-          value={pageInput}
-          onChange={(e) => setPageInput(e.target.value)}
-          onFocus={() => setPageJumpError(false)}
-          placeholder="Go to page"
-          max={totalPages}
-          min={1}
-          style={{ width: "100px" }}
-        />
-               {" "}
-        <button
-          onClick={() => {
-            const target = parseInt(pageInput, 10);
-            if (target > totalPages || target < 1 || isNaN(target)) {
-              setPageJumpError(true);
-            } else {
-              handlePageJump();
-            }
+        <h1>Pods</h1>
+      </header>
+
+      <section style={{ padding: "20px", borderBottom: "1px solid #eee" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            marginBottom: "10px",
           }}
         >
-                    Go        {" "}
-        </button>
-               {" "}
-        <p style={{ color: "red" }}>
-                    {pageJumpError && "Page must be between 1 & " + totalPages} 
-               {" "}
-        </p>
-             {" "}
-      </div>
-         {" "}
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="New pod"
+          />
+          <button onClick={addPod}>Add Pod</button>
+        </div>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <label htmlFor="sort">Sort By:</label>
+          <select
+            id="sort"
+            value={sortPreference}
+            onChange={(e) => setSortPreference(e.target.value)}
+          >
+            <option value="desc">ID Descending</option>
+            <option value="asc">ID Ascending</option>
+          </select>
+          <label htmlFor="pageSize">Result per page:</label>
+          <select
+            id="pageSize"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+      </section>
+
+      <main style={{ padding: "20px", flexGrow: 1 }}>
+        <h2>Created Pods</h2>
+        <ul>
+          {pods.map((pod) => (
+            <li key={pod.id}>
+              {pod.id}: {pod.title}
+            </li>
+          ))}
+        </ul>
+        {pods.length === 0 && <p>No pods created yet.</p>}
+      </main>
+
+      <footer
+        style={{
+          padding: "20px",
+          borderTop: "1px solid #eee",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div>
+          Result per page
+          <select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            style={{ marginLeft: "5px" }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+        <div>
+          <span>
+            {firstResult}-{lastResult} of {podsTotal}
+          </span>
+          <button
+            onClick={goToFirstPage}
+            disabled={isFirstPage}
+            style={{
+              marginLeft: "10px",
+              fontWeight: "bold",
+              cursor: isFirstPage ? "default" : "pointer",
+            }}
+          >
+            {leftDoubleArrow}
+          </button>
+          <button
+            onClick={goToPreviousPage}
+            disabled={isFirstPage}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isFirstPage ? "default" : "pointer",
+            }}
+          >
+            {leftSingleArrow}
+          </button>
+          <button
+            onClick={goToNextPage}
+            disabled={isLastPage}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isLastPage ? "default" : "pointer",
+            }}
+          >
+            {rightSingleArrow}
+          </button>
+          <button
+            onClick={goToLastPage}
+            disabled={isLastPage || totalPages === 0}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isLastPage || totalPages === 0 ? "default" : "pointer",
+            }}
+          >
+            {rightDoubleArrow}
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
