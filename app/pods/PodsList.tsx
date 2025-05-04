@@ -9,7 +9,7 @@ const leftSingleArrow = "\u2039";
 const rightSingleArrow = "\u203A";
 const rightDoubleArrow = "\u00BB";
 
-export default function PodList() {
+export default function PodsList() {
   const [pods, setPods] = useState([]);
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
@@ -307,6 +307,7 @@ export default function PodList() {
         <div>
           Result per page
           <select
+            data-testid="page-size-select"
             value={pageSize}
             onChange={handlePageSizeChange}
             style={{ marginLeft: "5px" }}
@@ -319,7 +320,7 @@ export default function PodList() {
           </select>
         </div>
         <div>
-          <span>
+          <span data-testid="results-count">
             {podsTotal === 0
               ? "0 results"
               : `${firstResult}-${lastResult} of ${podsTotal}`}
