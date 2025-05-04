@@ -100,6 +100,34 @@ export default function PodList() {
     }
   };
 
+  const deletePod = async (id) => {
+    setIsFetching(true);
+    try {
+      const res = await fetch("/api/pods", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        // Optimistically update the UI by removing the pod immediately
+        setPods(pods.filter((pod) => pod.id !== id));
+
+        // Optionally, fetch the updated pod count to keep pagination accurate
+        const countRes = await fetch(
+          `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
+        );
+        const countData = await countRes.json();
+        setPodsTotal(countData.total);
+      } else {
+        console.error("Failed to delete pod");
+        // Optionally, show an error message to the user
+      }
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
@@ -234,9 +262,29 @@ export default function PodList() {
                 height: "150px",
                 overflowY: "auto",
                 wordBreak: "break-word",
+                position: "relative",
               }}
             >
-              {pod.id}: {pod.title}
+              <button
+                onClick={() => deletePod(pod.id)}
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  background: "transparent",
+                  border: "none",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                }}
+                aria-label="Delete pod"
+              >
+                ×
+              </button>
+              <div style={{ paddingTop: "20px" }}>
+                {pod.title}
+              </div>
             </li>
           ))}
         </ul>
