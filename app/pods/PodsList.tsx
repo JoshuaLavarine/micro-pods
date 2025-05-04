@@ -1,3 +1,4 @@
+// PodList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,11 +19,7 @@ export default function PodList() {
   const [sortPreference, setSortPreference] = useState("desc");
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
-  const fetchPods = async (
-    targetPage = page,
-    currentSort = sortPreference,
-    size = pageSize
-  ) => {
+  const fetchPods = async (targetPage = page, currentSort = sortPreference, size = pageSize) => {
     const res = await fetch(
       `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
     );
@@ -106,28 +103,13 @@ export default function PodList() {
   };
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
-      <header
-        style={{
-          padding: "20px",
-          borderBottom: "1px solid #eee",
-          textAlign: "center",
-        }}
-      >
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <header style={{ padding: "20px", borderBottom: "1px solid #eee", textAlign: "center", position: "sticky", top: 0, backgroundColor: "white", zIndex: 10 }}>
         <h1>Pods</h1>
       </header>
 
-      <section style={{ padding: "20px", borderBottom: "1px solid #eee" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-            marginBottom: "10px",
-          }}
-        >
+      <section style={{ padding: "20px", borderBottom: "1px solid #eee", position: "sticky", top: "61px", backgroundColor: "white", zIndex: 9 }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -146,11 +128,7 @@ export default function PodList() {
             <option value="asc">ID Ascending</option>
           </select>
           <label htmlFor="pageSize">Result per page:</label>
-          <select
-            id="pageSize"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-          >
+          <select id="pageSize" value={pageSize} onChange={handlePageSizeChange}>
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -160,7 +138,7 @@ export default function PodList() {
         </div>
       </section>
 
-      <main style={{ padding: "20px", flexGrow: 1 }}>
+      <main style={{ padding: "20px", flexGrow: 1, overflowY: "auto" }}>
         <h2>Created Pods</h2>
         <ul>
           {pods.map((pod) => (
@@ -172,22 +150,10 @@ export default function PodList() {
         {pods.length === 0 && <p>No pods created yet.</p>}
       </main>
 
-      <footer
-        style={{
-          padding: "20px",
-          borderTop: "1px solid #eee",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <footer style={{ padding: "20px", borderTop: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", bottom: 0, backgroundColor: "white", zIndex: 10 }}>
         <div>
           Result per page
-          <select
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            style={{ marginLeft: "5px" }}
-          >
+          <select value={pageSize} onChange={handlePageSizeChange} style={{ marginLeft: "5px" }}>
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -196,50 +162,36 @@ export default function PodList() {
           </select>
         </div>
         <div>
-          <span>
-            {firstResult}-{lastResult} of {podsTotal}
-          </span>
+          <span>{firstResult}-{lastResult} of {podsTotal}</span>
           <button
             onClick={goToFirstPage}
             disabled={isFirstPage}
-            style={{
-              marginLeft: "10px",
-              fontWeight: "bold",
-              cursor: isFirstPage ? "default" : "pointer",
-            }}
+            style={{ marginLeft: "10px", fontWeight: "bold", cursor: isFirstPage ? "default" : "pointer" }}
+            title="Go to first page"
           >
             {leftDoubleArrow}
           </button>
           <button
             onClick={goToPreviousPage}
             disabled={isFirstPage}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isFirstPage ? "default" : "pointer",
-            }}
+            style={{ marginLeft: "5px", fontWeight: "bold", cursor: isFirstPage ? "default" : "pointer" }}
+            title="Go to previous page"
           >
             {leftSingleArrow}
           </button>
           <button
             onClick={goToNextPage}
             disabled={isLastPage}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isLastPage ? "default" : "pointer",
-            }}
+            style={{ marginLeft: "5px", fontWeight: "bold", cursor: isLastPage ? "default" : "pointer" }}
+            title="Go to next page"
           >
             {rightSingleArrow}
           </button>
           <button
             onClick={goToLastPage}
             disabled={isLastPage || totalPages === 0}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isLastPage || totalPages === 0 ? "default" : "pointer",
-            }}
+            style={{ marginLeft: "5px", fontWeight: "bold", cursor: (isLastPage || totalPages === 0) ? "default" : "pointer" }}
+            title="Go to last page"
           >
             {rightDoubleArrow}
           </button>
