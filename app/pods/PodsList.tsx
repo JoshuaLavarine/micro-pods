@@ -19,7 +19,11 @@ export default function PodList() {
   const [sortPreference, setSortPreference] = useState("desc");
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
-  const fetchPods = async (targetPage = page, currentSort = sortPreference, size = pageSize) => {
+  const fetchPods = async (
+    targetPage = page,
+    currentSort = sortPreference,
+    size = pageSize
+  ) => {
     const res = await fetch(
       `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
     );
@@ -104,45 +108,100 @@ export default function PodList() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <header style={{ padding: "20px", borderBottom: "1px solid #eee", textAlign: "center", position: "sticky", top: 0, backgroundColor: "white", zIndex: 10 }}>
-        <h1>Pods</h1>
+      <header
+        style={{
+          padding: "20px",
+          borderBottom: "1px solid #eee",
+          textAlign: "center",
+          position: "sticky",
+          top: 0,
+          backgroundColor: "white",
+          zIndex: 10,
+        }}
+      >
+        <h1>Micro-Pods</h1>
       </header>
 
-      <section style={{ padding: "20px", borderBottom: "1px solid #eee", position: "sticky", top: "61px", backgroundColor: "white", zIndex: 9 }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-          <input
+      <section
+        style={{
+          padding: "20px",
+          borderBottom: "1px solid #eee",
+          position: "sticky",
+          top: "61px",
+          backgroundColor: "white",
+          zIndex: 9,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            marginBottom: "10px",
+          }}
+        >
+          <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="New pod"
+            rows={4}
+            style={{
+              width: "100%",
+              resize: "vertical",
+              overflowY: "auto",
+              maxHeight: "150px",
+              marginBottom: "5px",
+            }}
           />
+          <div style={{ textAlign: "right", fontSize: "0.9em", color: "#666" }}>
+            {input.length} characters
+          </div>
           <button onClick={addPod}>Add Pod</button>
-        </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <label htmlFor="sort">Sort By:</label>
-          <select
-            id="sort"
-            value={sortPreference}
-            onChange={(e) => setSortPreference(e.target.value)}
-          >
-            <option value="desc">ID Descending</option>
-            <option value="asc">ID Ascending</option>
-          </select>
-          <label htmlFor="pageSize">Result per page:</label>
-          <select id="pageSize" value={pageSize} onChange={handlePageSizeChange}>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
         </div>
       </section>
 
       <main style={{ padding: "20px", flexGrow: 1, overflowY: "auto" }}>
-        <h2>Created Pods</h2>
-        <ul>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            justifyContent: "space-between",
+            marginBottom: "10px",
+          }}
+        >
+          <h2>Your Pods</h2>
+          <span>
+            <label htmlFor="sort">Sort By:</label>
+            <select
+              id="sort"
+              value={sortPreference}
+              onChange={(e) => setSortPreference(e.target.value)}
+            >
+              <option value="desc">ID Descending</option>
+              <option value="asc">ID Ascending</option>
+            </select>
+          </span>
+        </div>
+        <ul
+          style={{
+            listStyleType: "none",
+            padding: 0,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", // Adjust minmax for desired size
+            gap: "10px",
+          }}
+        >
           {pods.map((pod) => (
-            <li key={pod.id}>
+            <li
+              key={pod.id}
+              style={{
+                border: "1px solid #ccc",
+                padding: "10px",
+                height: "150px", // Fixed height for all pods
+                overflowY: "auto", // Enable scrolling for long text
+                wordBreak: "break-word",
+              }}
+            >
               {pod.id}: {pod.title}
             </li>
           ))}
@@ -150,10 +209,26 @@ export default function PodList() {
         {pods.length === 0 && <p>No pods created yet.</p>}
       </main>
 
-      <footer style={{ padding: "20px", borderTop: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", bottom: 0, backgroundColor: "white", zIndex: 10 }}>
+      <footer
+        style={{
+          padding: "20px",
+          borderTop: "1px solid #eee",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "white",
+          bottom: 0,
+          position: "sticky",
+          zIndex: 10,
+        }}
+      >
         <div>
           Result per page
-          <select value={pageSize} onChange={handlePageSizeChange} style={{ marginLeft: "5px" }}>
+          <select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            style={{ marginLeft: "5px" }}
+          >
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -162,11 +237,17 @@ export default function PodList() {
           </select>
         </div>
         <div>
-          <span>{firstResult}-{lastResult} of {podsTotal}</span>
+          <span>
+            {firstResult}-{lastResult} of {podsTotal}
+          </span>
           <button
             onClick={goToFirstPage}
             disabled={isFirstPage}
-            style={{ marginLeft: "10px", fontWeight: "bold", cursor: isFirstPage ? "default" : "pointer" }}
+            style={{
+              marginLeft: "10px",
+              fontWeight: "bold",
+              cursor: isFirstPage ? "default" : "pointer",
+            }}
             title="Go to first page"
           >
             {leftDoubleArrow}
@@ -174,7 +255,11 @@ export default function PodList() {
           <button
             onClick={goToPreviousPage}
             disabled={isFirstPage}
-            style={{ marginLeft: "5px", fontWeight: "bold", cursor: isFirstPage ? "default" : "pointer" }}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isFirstPage ? "default" : "pointer",
+            }}
             title="Go to previous page"
           >
             {leftSingleArrow}
@@ -182,7 +267,11 @@ export default function PodList() {
           <button
             onClick={goToNextPage}
             disabled={isLastPage}
-            style={{ marginLeft: "5px", fontWeight: "bold", cursor: isLastPage ? "default" : "pointer" }}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isLastPage ? "default" : "pointer",
+            }}
             title="Go to next page"
           >
             {rightSingleArrow}
@@ -190,7 +279,11 @@ export default function PodList() {
           <button
             onClick={goToLastPage}
             disabled={isLastPage || totalPages === 0}
-            style={{ marginLeft: "5px", fontWeight: "bold", cursor: (isLastPage || totalPages === 0) ? "default" : "pointer" }}
+            style={{
+              marginLeft: "5px",
+              fontWeight: "bold",
+              cursor: isLastPage || totalPages === 0 ? "default" : "pointer",
+            }}
             title="Go to last page"
           >
             {rightDoubleArrow}
