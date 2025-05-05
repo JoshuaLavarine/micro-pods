@@ -91,11 +91,11 @@ export default function Footer({
         </button>
         <button
           onClick={goToNextPage}
-          disabled={isLastPage}
+          disabled={isLastPage || podsTotal === 0 }
           style={{
             marginLeft: "5px",
             fontWeight: "bold",
-            cursor: isLastPage ? "default" : "pointer",
+            cursor: isLastPage || podsTotal === 0 ? "default" : "pointer",
           }}
           title="Go to next page"
         >
