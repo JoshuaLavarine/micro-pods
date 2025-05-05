@@ -74,7 +74,7 @@ describe("Populated PodsList Component", () => {
       expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
     });
 
-    const textarea = screen.getByPlaceholderText("New pod");
+    const textarea = screen.getByPlaceholderText("Define your pod here...");
     await user.type(textarea, "New Pod");
 
     const addButton = screen.getByText("Add Pod");
@@ -298,7 +298,7 @@ describe("Populated PodsList Component", () => {
       expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
     });
 
-    const textarea = screen.getByPlaceholderText("New pod");
+    const textarea = screen.getByPlaceholderText("Define your pod here...");
     await user.type(textarea, "Persisted Pod");
 
     const sortSelect = screen.getByLabelText(/Sort By:/i);
