@@ -6,8 +6,8 @@ import {
 } from "./responseHelpers";
 import { Pod, CreatePodRequest, DeletePodRequest } from "../../types";
 
-let pods: Pod[] = [];
-let podsIdCounter = { value: 1 };
+const pods: Pod[] = [];
+const podsIdCounter = { value: 1 };
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get("pageSize") || "5", 10);
     const sortBy = searchParams.get("sortBy") || "newestFirst";
 
-    const { paginated, total } = paginateAndSortPods(
+    const { pods: paginated, total } = paginateAndSortPods(
       pods,
       page,
       pageSize,

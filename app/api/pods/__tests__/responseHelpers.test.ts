@@ -1,3 +1,4 @@
+import { Pod } from "@/app/types";
 import {
   paginateAndSortPods,
   createPod,
@@ -16,7 +17,7 @@ describe("responseHelpers", () => {
       const pageSize = 2;
       const sortBy = "oldestFirst";
 
-      const { paginated, total } = paginateAndSortPods(
+      const { pods: paginated, total } = paginateAndSortPods(
         pods,
         page,
         pageSize,
@@ -40,7 +41,7 @@ describe("responseHelpers", () => {
       const pageSize = 2;
       const sortBy = "newestFirst";
 
-      const { paginated, total } = paginateAndSortPods(
+      const { pods: paginated, total } = paginateAndSortPods(
         pods,
         page,
         pageSize,
@@ -63,7 +64,7 @@ describe("responseHelpers", () => {
       const pageSize = 2;
       const sortBy = "oldestFirst";
 
-      const { paginated, total } = paginateAndSortPods(
+      const { pods: paginated, total } = paginateAndSortPods(
         pods,
         page,
         pageSize,
@@ -75,12 +76,12 @@ describe("responseHelpers", () => {
     });
 
     it("should handle an empty pods array", () => {
-      const pods = [];
+      const pods: Pod[] = [];
       const page = 1;
       const pageSize = 2;
       const sortBy = "oldestFirst";
 
-      const { paginated, total } = paginateAndSortPods(
+      const { pods: paginated, total } = paginateAndSortPods(
         pods,
         page,
         pageSize,
@@ -93,19 +94,23 @@ describe("responseHelpers", () => {
   });
 
   describe("createPod", () => {
-    let pods;
-
+    let pods: Pod[];
+    let podsIdCounter: { value: number };
     beforeEach(() => {
       pods = [
         { id: 1, title: "Pod 1" },
         { id: 2, title: "Pod 2" },
       ];
-      global.pods = pods;
-      global.podsIdCounter = { value: 3 };
+      podsIdCounter = { value: 3 };
     });
 
     afterEach(() => {
-      delete global.pods; // Clean up the global pods array
+      // Reset the pods array
+      pods = [
+        { id: 1, title: "Pod 1" },
+        { id: 2, title: "Pod 2" },
+      ];
+      podsIdCounter = { value: 3 };
     });
 
     it("should create a new pod and add it to the pods array", () => {
@@ -122,7 +127,7 @@ describe("responseHelpers", () => {
   });
 
   describe("removePodById", () => {
-    let pods;
+    let pods: Pod[];
 
     beforeEach(() => {
       pods = [

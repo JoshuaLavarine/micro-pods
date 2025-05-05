@@ -13,7 +13,7 @@ export function paginateAndSortPods(
     sortBy === "oldestFirst" ? a.id - b.id : b.id - a.id
   );
   const paginated = sortedPods.slice(start, end);
-  return { paginated, total };
+  return { pods: paginated, total };
 }
 
 export function createPod(

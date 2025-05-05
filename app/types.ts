@@ -4,7 +4,7 @@ export interface Pod {
 }
 
 export interface PaginatedPods {
-  paginated: Pod[];
+  pods: Pod[];
   total: number;
 }
 
