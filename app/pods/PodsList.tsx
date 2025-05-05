@@ -1,4 +1,3 @@
-// PodList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,6 +17,7 @@ export default function PodsList() {
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState(null);
 
   const totalPages = Math.ceil(podsTotal / pageSize);
   const isFirstPage = page === 1;
@@ -25,7 +25,6 @@ export default function PodsList() {
   const firstResult = (page - 1) * pageSize + 1;
   const lastResult = Math.min(page * pageSize, podsTotal);
 
-  // Load state from localStorage once on mount
   useEffect(() => {
     const savedInput = localStorage.getItem("podInput");
     const savedPage = localStorage.getItem("currentPage");
@@ -40,7 +39,6 @@ export default function PodsList() {
     setIsHydrated(true);
   }, []);
 
-  // Persist state changes to localStorage
   useEffect(() => {
     if (!isHydrated) return;
     localStorage.setItem("podInput", input);
@@ -55,19 +53,25 @@ export default function PodsList() {
     size = pageSize
   ) => {
     setIsFetching(true);
+    setError(null); // Reset error state
     try {
       const res = await fetch(
         `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
       );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to fetch pods.");
+      }
       const data = await res.json();
       setPods(data.pods);
       setPodsTotal(data.total);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setIsFetching(false);
     }
   };
 
-  // Fetch pods after hydration or when pagination/sort/pageSize changes
   useEffect(() => {
     if (isHydrated) {
       fetchPods();
@@ -75,32 +79,37 @@ export default function PodsList() {
   }, [page, sortPreference, pageSize, isHydrated]);
 
   const addPod = async () => {
-    const res = await fetch("/api/pods", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    const res = await fetch("/api/pods", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: input }),
-    });
+    setError(null); // Reset error state
+    try {
+      const res = await fetch("/api/pods", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: input }),
+      });
 
-    if (res.status === 201) {
-      setInput("");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to create pod.");
+      }
 
-      const data = await res.json(); // Assume the response contains the new pod, updated pods, and total count
+      const data = await res.json();
       const { pod: newPod, total: updatedTotal } = data;
 
       const newTotalPages = Math.ceil(updatedTotal / pageSize);
       const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1;
 
-      setPods([...pods, newPod]); // Update the pods list directly
-      setPodsTotal(updatedTotal); // Update the total count
-      setPage(targetPageAfterAdd); // Update the current page
+      setPods([...pods, newPod]);
+      setPodsTotal(updatedTotal);
+      setPage(targetPageAfterAdd);
+      setInput("");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   const deletePod = async (id) => {
     setIsFetching(true);
+    setError(null); // Reset error state
     try {
       const res = await fetch("/api/pods", {
         method: "DELETE",
@@ -108,23 +117,22 @@ export default function PodsList() {
         body: JSON.stringify({ id }),
       });
 
-      if (res.ok) {
-        // Immediately update the UI to remove the deleted pod
-        setPods(pods.filter((pod) => pod.id !== id));
-
-        // Update total count and page from response data
-        const data = await res.json();
-        const { total: updatedTotal } = data;
-
-        const newTotalPages = Math.ceil(updatedTotal / pageSize);
-        const targetPageAfterDelete = Math.min(page, newTotalPages);
-
-        setPodsTotal(updatedTotal); // Update the total count
-        setPage(targetPageAfterDelete); // Adjust the current page if necessary
-      } else {
-        console.error("Failed to delete pod");
-        // Optionally, show an error message to the user
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete pod.");
       }
+
+      const data = await res.json();
+      const { total: updatedTotal } = data;
+
+      const newTotalPages = Math.ceil(updatedTotal / pageSize);
+      const targetPageAfterDelete = Math.min(page, newTotalPages);
+
+      setPods(pods.filter((pod) => pod.id !== id));
+      setPodsTotal(updatedTotal);
+      setPage(targetPageAfterDelete);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setIsFetching(false);
     }
@@ -141,7 +149,6 @@ export default function PodsList() {
   const goToNextPage = () => page < totalPages && setPage(page + 1);
   const goToLastPage = () => setPage(totalPages);
 
-  // Show loading state during hydration or fetching
   if (!isHydrated || isFetching) {
     return (
       <div style={{ padding: "40px", textAlign: "center" }}>
@@ -172,6 +179,19 @@ export default function PodsList() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {error && (
+        <div
+          style={{
+            backgroundColor: "#f8d7da",
+            color: "#721c24",
+            padding: "10px",
+            marginBottom: "10px",
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </div>
+      )}
       <header
         style={{
           padding: "20px",
