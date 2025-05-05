@@ -212,17 +212,17 @@ describe("PodsList Component", () => {
 
     // Change sort order to ascending
     const sortSelect = screen.getByLabelText(/Sort By:/i);
-    await user.selectOptions(sortSelect, "asc");
+    await user.selectOptions(sortSelect, "oldestFirst");
 
     // Verify the correct API call was made
     await waitFor(() => {
       const fetchCalls = fetchMock.mock.calls;
 
       // Check the URL of the first call
-      expect(fetchCalls[0][0]).toEqual(expect.stringContaining("sortBy=desc"));
+      expect(fetchCalls[0][0]).toEqual(expect.stringContaining("sortBy=newestFirst"));
 
       // Check the URL of the second call
-      expect(fetchCalls[1][0]).toEqual(expect.stringContaining("sortBy=asc"));
+      expect(fetchCalls[1][0]).toEqual(expect.stringContaining("sortBy=oldestFirst"));
     });
   });
 

@@ -4,7 +4,7 @@ export function paginateAndSortPods(pods, page, pageSize, sortBy) {
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
   const sortedPods = [...pods].sort((a, b) =>
-    sortBy === "asc" ? a.id - b.id : b.id - a.id
+    sortBy === "oldestFirst" ? a.id - b.id : b.id - a.id
   );
   const paginated = sortedPods.slice(start, end);
   return { paginated, total };

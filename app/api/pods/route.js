@@ -13,7 +13,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "5", 10);
-    const sortBy = searchParams.get("sortBy") || "desc";
+    const sortBy = searchParams.get("sortBy") || "newestFirst";
 
     const { paginated, total } = paginateAndSortPods(
       pods,

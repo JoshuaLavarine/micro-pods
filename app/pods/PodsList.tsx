@@ -13,7 +13,7 @@ export default function PodsList() {
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
   const [podsTotal, setPodsTotal] = useState(0);
-  const [sortPreference, setSortPreference] = useState("desc");
+  const [sortPreference, setSortPreference] = useState("newestFirst");
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -96,7 +96,7 @@ export default function PodsList() {
       const { pod: newPod, total: updatedTotal } = data;
 
       const newTotalPages = Math.ceil(updatedTotal / pageSize);
-      const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1;
+      const targetPageAfterAdd = sortPreference === "newestFirst" ? 1 : newTotalPages;
 
       setPods([...pods, newPod]);
       setPodsTotal(updatedTotal);
@@ -261,8 +261,8 @@ export default function PodsList() {
               value={sortPreference}
               onChange={(e) => setSortPreference(e.target.value)}
             >
-              <option value="desc">ID Descending</option>
-              <option value="asc">ID Ascending</option>
+              <option value="newestFirst">Newest First</option>
+              <option value="oldestFirst">Oldest First</option>
             </select>
           </span>
         </div>

@@ -14,7 +14,7 @@ describe("responseHelpers", () => {
       ];
       const page = 1;
       const pageSize = 2;
-      const sortBy = "asc";
+      const sortBy = "oldestFirst";
 
       const { paginated, total } = paginateAndSortPods(
         pods,
@@ -38,7 +38,7 @@ describe("responseHelpers", () => {
       ];
       const page = 1;
       const pageSize = 2;
-      const sortBy = "desc";
+      const sortBy = "newestFirst";
 
       const { paginated, total } = paginateAndSortPods(
         pods,
@@ -61,7 +61,7 @@ describe("responseHelpers", () => {
       ];
       const page = 3;
       const pageSize = 2;
-      const sortBy = "asc";
+      const sortBy = "oldestFirst";
 
       const { paginated, total } = paginateAndSortPods(
         pods,
@@ -78,7 +78,7 @@ describe("responseHelpers", () => {
       const pods = [];
       const page = 1;
       const pageSize = 2;
-      const sortBy = "asc";
+      const sortBy = "oldestFirst";
 
       const { paginated, total } = paginateAndSortPods(
         pods,
