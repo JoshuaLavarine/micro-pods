@@ -46,8 +46,11 @@ export default function Footer({
         <select
           data-testid="page-size-select"
           value={pageSize}
-          onChange={(e) => {setPageSize(parseInt(e.target.value, 10)); setPage(1)}}
-          style={{ marginLeft: "5px" }}
+          onChange={(e) => {
+            setPageSize(parseInt(e.target.value, 10));
+            setPage(1);
+          }}
+          style={{ marginLeft: "5px", cursor: "pointer" }}
         >
           <option value={5}>5</option>
           <option value={10}>10</option>

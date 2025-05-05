@@ -57,18 +57,18 @@ export default function PodsList() {
       setIsFetching(true);
       setError(null);
       try {
-        const res = await fetch(
+        const response = await fetch(
           `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
         );
-        if (!res.ok) {
-          const errorData = await res.json();
+        if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(errorData.error || "Failed to fetch pods.");
         }
-        const data: PaginatedPods = await res.json();
+        const data: PaginatedPods = await response.json();
         setPods(data.pods);
         setPodsTotal(data.total);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (error: any) {
+        setError(error.message);
       } finally {
         setIsFetching(false);
       }
@@ -83,20 +83,21 @@ export default function PodsList() {
   }, [fetchPods, page, sortPreference, pageSize, isHydrated]);
 
   const addPod = async () => {
+    setIsFetching(true);
     setError(null);
     try {
-      const res = await fetch("/api/pods", {
+      const response = await fetch("/api/pods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: input }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
+      if (!response.ok) {
+        const errorData = await response.json();
         throw new Error(errorData.error || "Failed to create pod.");
       }
 
-      const data: { pod: Pod; total: number } = await res.json();
+      const data: { pod: Pod; total: number } = await response.json();
       const newTotalPages = Math.ceil(data.total / pageSize);
       const targetPageAfterAdd =
         sortPreference === "newestFirst" ? 1 : newTotalPages;
@@ -107,8 +108,10 @@ export default function PodsList() {
       setInput("");
 
       fetchPods(targetPageAfterAdd, sortPreference, pageSize);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -116,18 +119,18 @@ export default function PodsList() {
     setIsFetching(true);
     setError(null);
     try {
-      const res = await fetch("/api/pods", {
+      const response = await fetch("/api/pods", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
+      if (!response.ok) {
+        const errorData = await response.json();
         throw new Error(errorData.error || "Failed to delete pod.");
       }
 
-      const data: { total: number } = await res.json();
+      const data: { total: number } = await response.json();
       const newTotalPages = Math.ceil(data.total / pageSize);
       const targetPageAfterDelete = Math.min(page, newTotalPages);
 
@@ -136,8 +139,8 @@ export default function PodsList() {
       setPage(targetPageAfterDelete);
 
       fetchPods(targetPageAfterDelete, sortPreference, pageSize);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: any) {
+      setError(error.message);
     } finally {
       setIsFetching(false);
     }
@@ -153,25 +156,6 @@ export default function PodsList() {
       <div style={{ padding: "40px", textAlign: "center" }}>
         <div className="spinner" />
         <p>{!isHydrated ? "Loading settings..." : "Loading pods..."}</p>
-        <style jsx>{`
-          .spinner {
-            margin: 0 auto 10px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #555;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 0.8s linear infinite;
-          }
-          @keyframes spin {
-            0% {
-              transform: rotate(0deg);
-            }
-            100% {
-              transform: rotate(360deg);
-            }
-          }
-        `}</style>
       </div>
     );
   }
@@ -210,6 +194,7 @@ export default function PodsList() {
               id="sort"
               value={sortPreference}
               onChange={(e) => setSortPreference(e.target.value)}
+              style={{ cursor: "pointer" }}
             >
               <option value="newestFirst">Newest First</option>
               <option value="oldestFirst">Oldest First</option>
@@ -218,7 +203,7 @@ export default function PodsList() {
         </div>
         <PodList pods={pods} deletePod={deletePod} />
         {pods.length === 0 && (
-          <p data-testid="empty-pods">No pods created yet.</p>
+          <p data-testid="empty-pods">Get started by creating a new pod.</p>
         )}
       </main>
       <Footer

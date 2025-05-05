@@ -28,7 +28,7 @@ export default function PodForm({ input, setInput, addPod }: PodFormProps) {
           data-testid="pod-text-area"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="New pod"
+          placeholder="Define your pod here..."
           rows={4}
           style={{
             width: "100%",
@@ -36,12 +36,15 @@ export default function PodForm({ input, setInput, addPod }: PodFormProps) {
             overflowY: "auto",
             maxHeight: "150px",
             marginBottom: "5px",
+            cursor: "text"
           }}
         />
-        <div style={{ textAlign: "right", fontSize: "0.9em", color: "#666" }}>
+        <div style={{ textAlign: "right", fontSize: "0.9em", color: "#777" }}>
           {input.length} characters
         </div>
-        <button onClick={addPod}>Add Pod</button>
+        <button style={{ cursor: "pointer" }} onClick={addPod}>
+          Add Pod
+        </button>
       </div>
     </section>
   );
