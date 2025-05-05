@@ -11,7 +11,7 @@ export function paginateAndSortPods(pods, page, pageSize, sortBy) {
 }
 
 // Used in POST request
-export function createPod(title) {
+export function createPod(pods, title) {
   const newPod = { id: pods.length + 1, title };
   pods.push(newPod);
   return newPod;

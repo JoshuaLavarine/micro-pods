@@ -108,14 +108,14 @@ describe("responseHelpers", () => {
     });
 
     it("should create a new pod and add it to the pods array", () => {
-      const newPod = createPod("New Pod");
+      const newPod = createPod(pods, "New Pod");
       expect(newPod).toEqual({ id: 3, title: "New Pod" });
       expect(pods).toContainEqual({ id: 3, title: "New Pod" });
     });
 
     it("should increment the id of the new pod correctly", () => {
-      createPod("Pod 3");
-      const newPod = createPod("Pod 4");
+      createPod(pods, "Pod 3");
+      const newPod = createPod(pods, "Pod 4");
       expect(newPod.id).toBe(4);
     });
   });
