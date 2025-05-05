@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pod, PaginatedPods } from "../types";
 
 const defaultPageSize = 5;
@@ -48,36 +48,39 @@ export default function PodsList() {
     localStorage.setItem("pageSize", pageSize.toString());
   }, [input, page, sortPreference, pageSize, isHydrated]);
 
-  const fetchPods = async (
-    targetPage = page,
-    currentSort = sortPreference,
-    size = pageSize
-  ) => {
-    setIsFetching(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
-      );
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to fetch pods.");
+  const fetchPods = useCallback(
+    async (
+      targetPage = page,
+      currentSort = sortPreference,
+      size = pageSize
+    ) => {
+      setIsFetching(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
+        );
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to fetch pods.");
+        }
+        const data: PaginatedPods = await res.json();
+        setPods(data.pods);
+        setPodsTotal(data.total);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsFetching(false);
       }
-      const data: PaginatedPods = await res.json();
-      setPods(data.pods);
-      setPodsTotal(data.total);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsFetching(false);
-    }
-  };
+    },
+    [page, sortPreference, pageSize] // Dependencies
+  );
 
   useEffect(() => {
     if (isHydrated) {
       fetchPods();
     }
-  }, [page, sortPreference, pageSize, isHydrated]);
+  }, [fetchPods, page, sortPreference, pageSize, isHydrated]);
 
   const addPod = async () => {
     setError(null);
@@ -140,7 +143,9 @@ export default function PodsList() {
     }
   };
 
-  const handlePageSizeChange = (event) => {
+  const handlePageSizeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
     setPage(1);
@@ -312,7 +317,9 @@ export default function PodsList() {
             </li>
           ))}
         </ul>
-        {pods.length === 0 && <p data-testid="empty-pods">No pods created yet.</p>}
+        {pods.length === 0 && (
+          <p data-testid="empty-pods">No pods created yet.</p>
+        )}
       </main>
 
       <footer
