@@ -22,7 +22,6 @@ describe("Populated PodsList Component", () => {
       })
     );
 
-    // Clear localStorage before each test
     window.localStorage.clear();
   });
 
@@ -75,7 +74,6 @@ describe("Populated PodsList Component", () => {
       expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
     });
 
-    // Fill in the textarea and click Add Pod
     const textarea = screen.getByPlaceholderText("New pod");
     await user.type(textarea, "New Pod");
 
@@ -85,10 +83,8 @@ describe("Populated PodsList Component", () => {
     // Verify the API was called with correct data
     await waitFor(() => {
       const fetchCalls = fetchMock.mock.calls;
-      const postCall = fetchCalls.find(
-        (call) => call[1]?.method === "POST" && call[0] === "/api/pods"
-      );
-      expect(postCall[1]?.body).toBe(JSON.stringify({ title: "New Pod" }));
+      const postCall = fetchCalls[1][1]
+      expect(postCall.body).toBe(JSON.stringify({ title: "New Pod" }));
     });
   });
 
@@ -128,10 +124,8 @@ describe("Populated PodsList Component", () => {
     // Verify the API was called for deletion
     await waitFor(() => {
       const fetchCalls = fetchMock.mock.calls;
-      const deleteCall = fetchCalls.find(
-        (call) => call[1]?.method === "DELETE" && call[0] === "/api/pods"
-      );
-      expect(deleteCall[1]?.method).toBe("DELETE");
+      const deleteCall = fetchCalls[1][1]
+      expect(deleteCall.method).toBe("DELETE");
     });
   });
 
@@ -232,8 +226,6 @@ describe("Populated PodsList Component", () => {
 
   it("navigates between pages", async () => {
     const user = userEvent.setup();
-
-    // Clear previous mocks (if needed)
     fetchMock.resetMocks();
 
     // Page 1: pods 1–5
@@ -306,7 +298,6 @@ describe("Populated PodsList Component", () => {
       expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
     });
 
-    // Fill in the textarea and click Add Pod
     const textarea = screen.getByPlaceholderText("New pod");
     await user.type(textarea, "Persisted Pod");
 

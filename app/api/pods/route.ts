@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const { title }: CreatePodRequest = await request.json();
     if (!title) {
       return NextResponse.json(
-        { error: "Title is required." },
+        { error: "Pod content is required." },
         { status: 400 }
       );
     }
