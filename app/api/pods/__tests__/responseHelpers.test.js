@@ -100,7 +100,8 @@ describe("responseHelpers", () => {
         { id: 1, title: "Pod 1" },
         { id: 2, title: "Pod 2" },
       ];
-      global.pods = pods; // Mock the global pods array
+      global.pods = pods;
+      global.podsIdCounter = { value: 3 };
     });
 
     afterEach(() => {
@@ -108,14 +109,14 @@ describe("responseHelpers", () => {
     });
 
     it("should create a new pod and add it to the pods array", () => {
-      const newPod = createPod(pods, "New Pod");
+      const newPod = createPod(pods, podsIdCounter, "New Pod");
       expect(newPod).toEqual({ id: 3, title: "New Pod" });
       expect(pods).toContainEqual({ id: 3, title: "New Pod" });
     });
 
     it("should increment the id of the new pod correctly", () => {
-      createPod(pods, "Pod 3");
-      const newPod = createPod(pods, "Pod 4");
+      createPod(pods, podsIdCounter, "Pod 3");
+      const newPod = createPod(pods, podsIdCounter, "Pod 4");
       expect(newPod.id).toBe(4);
     });
   });

@@ -7,6 +7,7 @@ import {
 
 // In-memory data store
 let pods = [];
+let podsIdCounter = {value: 1};
 
 export async function GET(request) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    const newPod = createPod(pods, title);
+    const newPod = createPod(pods, podsIdCounter, title);
     return NextResponse.json(
       { pod: newPod, total: pods.length },
       { status: 201 }
