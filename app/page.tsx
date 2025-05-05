@@ -1,4 +1,4 @@
-import PodsList from "./pods/PodsList";
+import PodsList from "./_components/pods/PodsList";
 
 export default function Home() {
   return (

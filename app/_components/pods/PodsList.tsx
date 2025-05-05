@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Pod, PaginatedPods } from "../types";
+import { Pod, PaginatedPods } from "../../types";
+import Header from "../Header";
+import PodForm from "./PodForm";
+import PodList from "./PodList";
+import Footer from "../Footer";
 
 const defaultPageSize = 5;
-const leftDoubleArrow = "\u00AB";
-const leftSingleArrow = "\u2039";
-const rightSingleArrow = "\u203A";
-const rightDoubleArrow = "\u00BB";
 
 export default function PodsList() {
   const [pods, setPods] = useState<Pod[]>([]);
@@ -73,7 +73,7 @@ export default function PodsList() {
         setIsFetching(false);
       }
     },
-    [page, sortPreference, pageSize] // Dependencies
+    [page, sortPreference, pageSize]
   );
 
   useEffect(() => {
@@ -143,14 +143,6 @@ export default function PodsList() {
     }
   };
 
-  const handlePageSizeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setPage(1);
-  };
-
   const goToFirstPage = () => setPage(1);
   const goToPreviousPage = () => page > 1 && setPage(page - 1);
   const goToNextPage = () => page < totalPages && setPage(page + 1);
@@ -200,59 +192,8 @@ export default function PodsList() {
           {error}
         </div>
       )}
-      <header
-        style={{
-          padding: "20px",
-          borderBottom: "1px solid #eee",
-          textAlign: "center",
-          position: "sticky",
-          top: 0,
-          backgroundColor: "white",
-          zIndex: 10,
-        }}
-      >
-        <h1>Micro-Pods</h1>
-      </header>
-
-      <section
-        style={{
-          padding: "20px",
-          borderBottom: "1px solid #eee",
-          position: "sticky",
-          top: "61px",
-          backgroundColor: "white",
-          zIndex: 9,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-            marginBottom: "10px",
-          }}
-        >
-          <textarea
-            data-testid="pod-text-area"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="New pod"
-            rows={4}
-            style={{
-              width: "100%",
-              resize: "vertical",
-              overflowY: "auto",
-              maxHeight: "150px",
-              marginBottom: "5px",
-            }}
-          />
-          <div style={{ textAlign: "right", fontSize: "0.9em", color: "#666" }}>
-            {input.length} characters
-          </div>
-          <button onClick={addPod}>Add Pod</button>
-        </div>
-      </section>
-
+      <Header />
+      <PodForm input={input} setInput={setInput} addPod={addPod} />
       <main style={{ padding: "20px", flexGrow: 1, overflowY: "auto" }}>
         <div
           style={{
@@ -275,137 +216,25 @@ export default function PodsList() {
             </select>
           </span>
         </div>
-        <ul
-          style={{
-            listStyleType: "none",
-            padding: 0,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          {pods.map((pod) => (
-            <li
-              key={pod.id}
-              style={{
-                border: "1px solid #ccc",
-                padding: "10px",
-                height: "150px",
-                overflowY: "auto",
-                wordBreak: "break-word",
-                position: "relative",
-              }}
-            >
-              <button
-                onClick={() => deletePod(pod.id)}
-                style={{
-                  position: "absolute",
-                  top: "5px",
-                  right: "5px",
-                  background: "transparent",
-                  border: "none",
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  lineHeight: "1",
-                }}
-                aria-label="Delete pod"
-              >
-                ×
-              </button>
-              <div style={{ paddingTop: "20px" }}>{pod.title}</div>
-            </li>
-          ))}
-        </ul>
+        <PodList pods={pods} deletePod={deletePod} />
         {pods.length === 0 && (
           <p data-testid="empty-pods">No pods created yet.</p>
         )}
       </main>
-
-      <footer
-        style={{
-          padding: "20px",
-          borderTop: "1px solid #eee",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: "white",
-          bottom: 0,
-          position: "sticky",
-          zIndex: 10,
-        }}
-      >
-        <div>
-          Result per page
-          <select
-            data-testid="page-size-select"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            style={{ marginLeft: "5px" }}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
-        <div>
-          <span data-testid="results-count">
-            {podsTotal === 0
-              ? "0 results"
-              : `${firstResult}-${lastResult} of ${podsTotal}`}
-          </span>
-          <button
-            onClick={goToFirstPage}
-            disabled={isFirstPage}
-            style={{
-              marginLeft: "10px",
-              fontWeight: "bold",
-              cursor: isFirstPage ? "default" : "pointer",
-            }}
-            title="Go to first page"
-          >
-            {leftDoubleArrow}
-          </button>
-          <button
-            onClick={goToPreviousPage}
-            disabled={isFirstPage}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isFirstPage ? "default" : "pointer",
-            }}
-            title="Go to previous page"
-          >
-            {leftSingleArrow}
-          </button>
-          <button
-            onClick={goToNextPage}
-            disabled={isLastPage}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isLastPage ? "default" : "pointer",
-            }}
-            title="Go to next page"
-          >
-            {rightSingleArrow}
-          </button>
-          <button
-            onClick={goToLastPage}
-            disabled={isLastPage || totalPages === 0}
-            style={{
-              marginLeft: "5px",
-              fontWeight: "bold",
-              cursor: isLastPage || totalPages === 0 ? "default" : "pointer",
-            }}
-            title="Go to last page"
-          >
-            {rightDoubleArrow}
-          </button>
-        </div>
-      </footer>
+      <Footer
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        setPage={setPage}
+        podsTotal={podsTotal}
+        firstResult={firstResult}
+        lastResult={lastResult}
+        isFirstPage={isFirstPage}
+        isLastPage={isLastPage}
+        goToFirstPage={goToFirstPage}
+        goToPreviousPage={goToPreviousPage}
+        goToNextPage={goToNextPage}
+        goToLastPage={goToLastPage}
+      />
     </div>
   );
 }
