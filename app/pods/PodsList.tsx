@@ -102,6 +102,8 @@ export default function PodsList() {
       setPodsTotal(updatedTotal);
       setPage(targetPageAfterAdd);
       setInput("");
+
+      fetchPods(targetPageAfterAdd, sortPreference, pageSize);
     } catch (err) {
       setError(err.message);
     }
