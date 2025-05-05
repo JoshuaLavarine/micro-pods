@@ -4,12 +4,12 @@ import {
   removePodById,
   paginateAndSortPods,
 } from "./responseHelpers";
+import { Pod, CreatePodRequest, DeletePodRequest } from "../../types";
 
-// In-memory data store
-let pods = [];
-let podsIdCounter = {value: 1};
+let pods: Pod[] = [];
+let podsIdCounter = { value: 1 };
 
-export async function GET(request) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -33,9 +33,9 @@ export async function GET(request) {
   }
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
-    const { title } = await request.json();
+    const { title }: CreatePodRequest = await request.json();
     if (!title) {
       return NextResponse.json(
         { error: "Title is required." },
@@ -56,9 +56,9 @@ export async function POST(request) {
   }
 }
 
-export async function DELETE(request) {
+export async function DELETE(request: Request) {
   try {
-    const { id } = await request.json();
+    const { id }: DeletePodRequest = await request.json();
     if (!id) {
       return NextResponse.json(
         { error: "Pod ID is required." },

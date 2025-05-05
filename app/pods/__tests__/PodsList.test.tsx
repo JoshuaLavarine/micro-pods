@@ -8,7 +8,7 @@ import fetchMock from "jest-fetch-mock";
 // Mock fetch globally
 global.fetch = fetchMock;
 
-describe("PodsList Component", () => {
+describe("Populated PodsList Component", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
     // Mock initial pods fetch
@@ -219,10 +219,14 @@ describe("PodsList Component", () => {
       const fetchCalls = fetchMock.mock.calls;
 
       // Check the URL of the first call
-      expect(fetchCalls[0][0]).toEqual(expect.stringContaining("sortBy=newestFirst"));
+      expect(fetchCalls[0][0]).toEqual(
+        expect.stringContaining("sortBy=newestFirst")
+      );
 
       // Check the URL of the second call
-      expect(fetchCalls[1][0]).toEqual(expect.stringContaining("sortBy=oldestFirst"));
+      expect(fetchCalls[1][0]).toEqual(
+        expect.stringContaining("sortBy=oldestFirst")
+      );
     });
   });
 
@@ -271,5 +275,82 @@ describe("PodsList Component", () => {
     });
 
     expect(screen.getByTestId("results-count")).toHaveTextContent("6-10 of 15");
+  });
+
+  it("disables navigation buttons on first and last pages", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        pods: [{ id: 1, title: "Test Pod 1" }],
+        total: 1,
+      })
+    );
+
+    render(<PodsList />);
+
+    await waitFor(() => {
+      expect(screen.getByTitle("Go to first page")).toBeDisabled();
+      expect(screen.getByTitle("Go to previous page")).toBeDisabled();
+      expect(screen.getByTitle("Go to next page")).toBeDisabled();
+      expect(screen.getByTitle("Go to last page")).toBeDisabled();
+    });
+  });
+
+  it("persists input and settings in localStorage", async () => {
+    const user = userEvent.setup();
+
+    render(<PodsList />);
+
+    // Wait for component to load
+    await waitFor(() => {
+      expect(screen.queryByText(/loading settings/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
+    });
+
+    // Fill in the textarea and click Add Pod
+    const textarea = screen.getByPlaceholderText("New pod");
+    await user.type(textarea, "Persisted Pod");
+
+    const sortSelect = screen.getByLabelText(/Sort By:/i);
+    await user.selectOptions(sortSelect, "oldestFirst");
+
+    const pageSizeSelect = screen.getByTestId("page-size-select");
+    await user.selectOptions(pageSizeSelect, "10");
+
+    // Verify localStorage values
+    expect(localStorage.getItem("podInput")).toBe("Persisted Pod");
+    expect(localStorage.getItem("sortPreference")).toBe("oldestFirst");
+    expect(localStorage.getItem("pageSize")).toBe("10");
+  });
+});
+
+describe("Empty PodSList Component", () => {
+  it("renders empty state when no pods are available", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        pods: [],
+        total: 0,
+      })
+    );
+
+    render(<PodsList />);
+
+    // Wait for component to load
+    await waitFor(() => {
+      expect(screen.queryByText(/loading settings/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("empty-pods")).toBeInTheDocument();
+  });
+
+  it("renders error message when fetch fails", async () => {
+    fetchMock.mockRejectOnce(new Error("Failed to fetch pods."));
+
+    render(<PodsList />);
+    await waitFor(() => {
+      expect(screen.queryByText(/loading settings/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/loading pods/i)).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("error-banner")).toBeInTheDocument();
   });
 });

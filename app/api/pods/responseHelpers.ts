@@ -1,5 +1,11 @@
-// Used in GET request
-export function paginateAndSortPods(pods, page, pageSize, sortBy) {
+import { Pod, PaginatedPods } from "../../types";
+
+export function paginateAndSortPods(
+  pods: Pod[],
+  page: number,
+  pageSize: number,
+  sortBy: string
+): PaginatedPods {
   const total = pods.length;
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
@@ -10,16 +16,18 @@ export function paginateAndSortPods(pods, page, pageSize, sortBy) {
   return { paginated, total };
 }
 
-// Used in POST request
-export function createPod(pods, counter, title) {
-  const newPod = { id: counter.value, title };
+export function createPod(
+  pods: Pod[],
+  counter: { value: number },
+  title: string
+): Pod {
+  const newPod: Pod = { id: counter.value, title };
   pods.push(newPod);
   counter.value++;
   return newPod;
 }
 
-// Used in DELETE request
-export function removePodById(podsArray, id) {
+export function removePodById(podsArray: Pod[], id: number): boolean {
   const index = podsArray.findIndex((pod) => pod.id === id);
   if (index !== -1) {
     podsArray.splice(index, 1);

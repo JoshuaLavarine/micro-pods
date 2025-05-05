@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Pod, PaginatedPods } from "../types";
 
 const defaultPageSize = 5;
 const leftDoubleArrow = "\u00AB";
@@ -9,15 +10,15 @@ const rightSingleArrow = "\u203A";
 const rightDoubleArrow = "\u00BB";
 
 export default function PodsList() {
-  const [pods, setPods] = useState([]);
-  const [input, setInput] = useState("");
-  const [page, setPage] = useState(1);
-  const [podsTotal, setPodsTotal] = useState(0);
-  const [sortPreference, setSortPreference] = useState("newestFirst");
-  const [pageSize, setPageSize] = useState(defaultPageSize);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState(null);
+  const [pods, setPods] = useState<Pod[]>([]);
+  const [input, setInput] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [podsTotal, setPodsTotal] = useState<number>(0);
+  const [sortPreference, setSortPreference] = useState<string>("newestFirst");
+  const [pageSize, setPageSize] = useState<number>(defaultPageSize);
+  const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalPages = Math.ceil(podsTotal / pageSize);
   const isFirstPage = page === 1;
@@ -53,7 +54,7 @@ export default function PodsList() {
     size = pageSize
   ) => {
     setIsFetching(true);
-    setError(null); // Reset error state
+    setError(null);
     try {
       const res = await fetch(
         `/api/pods?page=${targetPage}&pageSize=${size}&sortBy=${currentSort}`
@@ -62,10 +63,10 @@ export default function PodsList() {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to fetch pods.");
       }
-      const data = await res.json();
+      const data: PaginatedPods = await res.json();
       setPods(data.pods);
       setPodsTotal(data.total);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setIsFetching(false);
@@ -79,7 +80,7 @@ export default function PodsList() {
   }, [page, sortPreference, pageSize, isHydrated]);
 
   const addPod = async () => {
-    setError(null); // Reset error state
+    setError(null);
     try {
       const res = await fetch("/api/pods", {
         method: "POST",
@@ -92,26 +93,25 @@ export default function PodsList() {
         throw new Error(errorData.error || "Failed to create pod.");
       }
 
-      const data = await res.json();
-      const { pod: newPod, total: updatedTotal } = data;
+      const data: { pod: Pod; total: number } = await res.json();
+      const newTotalPages = Math.ceil(data.total / pageSize);
+      const targetPageAfterAdd =
+        sortPreference === "newestFirst" ? 1 : newTotalPages;
 
-      const newTotalPages = Math.ceil(updatedTotal / pageSize);
-      const targetPageAfterAdd = sortPreference === "newestFirst" ? 1 : newTotalPages;
-
-      setPods([...pods, newPod]);
-      setPodsTotal(updatedTotal);
+      setPods([...pods, data.pod]);
+      setPodsTotal(data.total);
       setPage(targetPageAfterAdd);
       setInput("");
 
       fetchPods(targetPageAfterAdd, sortPreference, pageSize);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     }
   };
 
-  const deletePod = async (id) => {
+  const deletePod = async (id: number) => {
     setIsFetching(true);
-    setError(null); // Reset error state
+    setError(null);
     try {
       const res = await fetch("/api/pods", {
         method: "DELETE",
@@ -124,16 +124,16 @@ export default function PodsList() {
         throw new Error(errorData.error || "Failed to delete pod.");
       }
 
-      const data = await res.json();
-      const { total: updatedTotal } = data;
-
-      const newTotalPages = Math.ceil(updatedTotal / pageSize);
+      const data: { total: number } = await res.json();
+      const newTotalPages = Math.ceil(data.total / pageSize);
       const targetPageAfterDelete = Math.min(page, newTotalPages);
 
       setPods(pods.filter((pod) => pod.id !== id));
-      setPodsTotal(updatedTotal);
+      setPodsTotal(data.total);
       setPage(targetPageAfterDelete);
-    } catch (err) {
+
+      fetchPods(targetPageAfterDelete, sortPreference, pageSize);
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setIsFetching(false);
@@ -183,6 +183,7 @@ export default function PodsList() {
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       {error && (
         <div
+          data-testid="error-banner"
           style={{
             backgroundColor: "#f8d7da",
             color: "#721c24",
@@ -227,6 +228,7 @@ export default function PodsList() {
           }}
         >
           <textarea
+            data-testid="pod-text-area"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="New pod"
@@ -310,7 +312,7 @@ export default function PodsList() {
             </li>
           ))}
         </ul>
-        {pods.length === 0 && <p>No pods created yet.</p>}
+        {pods.length === 0 && <p data-testid="empty-pods">No pods created yet.</p>}
       </main>
 
       <footer
