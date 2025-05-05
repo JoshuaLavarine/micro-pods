@@ -7,7 +7,7 @@ A Next.js application for creating and managing small text snippets called "Pods
 Micro-Pods is a simple web application built with Next.js that allows users to create, view, and delete short text snippets. The application features:
 
 - Create and delete pods
-- Pagination with customizable page size
+- Pagination with customisable page size
 - Sorting options (newest first or oldest first)
 - Persistent settings using localStorage
 
@@ -77,7 +77,7 @@ app/
 - **View Pods**: Display in a responsive grid
 - **Delete Pods**: Remove unwanted pods
 - **Pagination**: Navigate through pods with first, previous, next, and last page controls
-- **Customizable Page Size**: Choose how many pods to display per page
+- **Customisable Page Size**: Choose how many pods to display per page
 - **Sorting**: Sort pods by creation time (newest first or oldest first)
 - **Persistent Settings**: User preferences and draft input are saved to localStorage
 
@@ -108,12 +108,16 @@ Given more time, these improvements would enhance the application:
 1. **Database Integration**: Replace in-memory storage with a proper database (MongoDB, PostgreSQL, etc.)
 2. **Authentication**: Add user accounts and authentication
 3. **State Management**: Implement a more robust state management solution for larger scale
-4. **Performance Optimizations**:
-   a. Pagination should be server-side
-   b. Memoize expensive calculations
-   c. Caching API responses
-5. **Accessibility**: Improve keyboard navigation and screen reader support
-6. **Testing**: Add end-to-end tests with Cypress or Playwright
+4. **Performance Optimisations**:
+
+   **a**. Pagination should be entirely server-side (client currently handles which page to show)
+   
+   **b**. Memoize expensive calculations
+   
+   **c**. Caching API responses
+   
+6. **Accessibility**: Improve keyboard navigation and screen reader support
+7. **Testing**: Add end-to-end tests with Cypress or Playwright
 
 ### Feature Enhancements
 
@@ -121,12 +125,5 @@ Given more time, these improvements would enhance the application:
 2. **Search Functionality**: Search within pod content
 3. **Export/Import**: Export pods as JSON or text files
 4. **Sharing**: Share pods with other users or via links
-
-## Browser Support
-
-- Chrome >= 91
-- Firefox >= 90
-- Edge >= 91
-- Safari >= 15
-- iOS >= 15
-- Opera >= 77
+5. **Editing**: Update pods after creation
+6. **Maximise Pod View**: Enable users to view fullscreen pods
