@@ -1,6 +1,10 @@
 // api/pods/route.js
 import { NextResponse } from "next/server";
-import {createPod, removePodById, paginateAndSortPods} from "./responseHelpers"
+import {
+  createPod,
+  removePodById,
+  paginateAndSortPods,
+} from "./responseHelpers";
 
 // In-memory data store
 let pods = [];
@@ -24,7 +28,10 @@ export async function GET(request) {
 export async function POST(request) {
   const { title } = await request.json();
   const newPod = createPod(pods, title);
-  return NextResponse.json(newPod, { status: 201 });
+  return NextResponse.json(
+    { pod: newPod, total: pods.length },
+    { status: 201 }
+  );
 }
 
 export async function DELETE(request) {

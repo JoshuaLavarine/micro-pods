@@ -87,16 +87,15 @@ export default function PodsList() {
     if (res.status === 201) {
       setInput("");
 
-      const countRes = await fetch(
-        `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
-      );
-      const countData = await countRes.json();
-      const updatedTotal = countData.total;
+      const data = await res.json(); // Assume the response contains the new pod, updated pods, and total count
+      const { pod: newPod, total: updatedTotal } = data;
+
       const newTotalPages = Math.ceil(updatedTotal / pageSize);
       const targetPageAfterAdd = sortPreference === "asc" ? newTotalPages : 1;
 
-      setPage(targetPageAfterAdd);
-      fetchPods(targetPageAfterAdd, sortPreference, pageSize);
+      setPods([...pods, newPod]); // Update the pods list directly
+      setPodsTotal(updatedTotal); // Update the total count
+      setPage(targetPageAfterAdd); // Update the current page
     }
   };
 
@@ -282,9 +281,7 @@ export default function PodsList() {
               >
                 ×
               </button>
-              <div style={{ paddingTop: "20px" }}>
-                {pod.title}
-              </div>
+              <div style={{ paddingTop: "20px" }}>{pod.title}</div>
             </li>
           ))}
         </ul>

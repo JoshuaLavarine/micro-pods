@@ -57,28 +57,13 @@ describe("PodsList Component", () => {
       // Initial pods fetch (set in beforeEach)
       [
         JSON.stringify({
-          id: 3,
-          title: "New Pod",
+          pod: {
+            id: 3,
+            title: "New Pod",
+          },
+          total: 3,
         }),
         { status: 201 },
-      ],
-      // Count fetch after adding
-      [
-        JSON.stringify({
-          pods: [{ id: 3, title: "New Pod" }],
-          total: 3,
-        }),
-      ],
-      // Refetch pods after adding
-      [
-        JSON.stringify({
-          pods: [
-            { id: 3, title: "New Pod" },
-            { id: 2, title: "Test Pod 2" },
-            { id: 1, title: "Test Pod 1" },
-          ],
-          total: 3,
-        }),
       ]
     );
 
