@@ -109,15 +109,18 @@ export default function PodsList() {
       });
 
       if (res.ok) {
-        // Optimistically update the UI by removing the pod immediately
+        // Immediately update the UI to remove the deleted pod
         setPods(pods.filter((pod) => pod.id !== id));
 
-        // Optionally, fetch the updated pod count to keep pagination accurate
-        const countRes = await fetch(
-          `/api/pods?page=1&pageSize=1&sortBy=${sortPreference}`
-        );
-        const countData = await countRes.json();
-        setPodsTotal(countData.total);
+        // Update total count and page from response data
+        const data = await res.json();
+        const { total: updatedTotal } = data;
+
+        const newTotalPages = Math.ceil(updatedTotal / pageSize);
+        const targetPageAfterDelete = Math.min(page, newTotalPages);
+
+        setPodsTotal(updatedTotal); // Update the total count
+        setPage(targetPageAfterDelete); // Adjust the current page if necessary
       } else {
         console.error("Failed to delete pod");
         // Optionally, show an error message to the user
